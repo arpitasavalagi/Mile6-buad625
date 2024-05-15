@@ -88,7 +88,7 @@ def mile1():
         for file in files:
             if pattern.match(file):
                 # Extract the ID from the file name and append it to the lists
-                parts = file.split('_')
+                parts = file.split('.')
                 cust_id = parts[0]
 \
                 cust_ids.append(cust_id)
