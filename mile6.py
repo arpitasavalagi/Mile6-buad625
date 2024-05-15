@@ -6,6 +6,7 @@ import boto3
 import pandas as pd
 import requests
 from urllib.parse import urlparse, parse_qs
+import shutil
 
 from fnmatch import fnmatch
 
@@ -45,9 +46,8 @@ def download_and_extract_zip(url):
 
 def compare_faces(sourceFile, targetFile):
 
-    session = boto3.Session(
-    aws_access_key_id=st.secrets["AWS_ACCESS_KEY_ID"],
-    aws_secret_access_key=st.secrets["AWS_SECRET_ACCESS_KEY"])
+    session = boto3.Session( aws_access_key_id=st.secrets["AWS_ACCESS_KEY_ID"], aws_secret_access_key=st.secrets["AWS_SECRET_ACCESS_KEY"])
+    #session = boto3.Session(profile_name='arisav')
     client = session.client('rekognition')
 
     imageSource = open(sourceFile, 'rb')
@@ -75,13 +75,12 @@ def compare_faces(sourceFile, targetFile):
     return facefound
 
 
-def mile1():
+def mile1(base_filename):
     # Initialize lists to store data
     cust_ids = []
-    bank_ids = []
 
     # Regex to match file names in the format XXXX_ID.jpg
-    pattern = re.compile(r'^\d{4}_\d+\.jpg$')
+    pattern = re.compile(r'^\d{4}.jpg$')
 
     # Walk through the directory and subdirectories to find matching files
     for root, dirs, files in os.walk("./init"):
@@ -90,7 +89,7 @@ def mile1():
                 # Extract the ID from the file name and append it to the lists
                 parts = file.split('.')
                 cust_id = parts[0]
-\
+
                 cust_ids.append(cust_id)
     
     print(cust_ids)
@@ -105,7 +104,7 @@ def mile1():
     # For now, assuming we save only image_ids_df
 
     # Specify the path to save the CSV file
-    csv_path = "./mile1.csv"
+    csv_path = f"./{base_filename}.csv"
 
     # Save the DataFrame to a CSV file
     combined_df.to_csv(csv_path, index=False)
@@ -122,7 +121,7 @@ def mile1():
             if fnmatch(filename, pattern):
                 full_path = os.path.join(image_directory, filename)
                 # Assuming there's a target image to compare with
-                target_image_path = f'./init/{cust_id}_{bankAcctID}.jpg'  # You need to define this
+                target_image_path = f'./init/{cust_id}.jpg'  # You need to define this
                 print(target_image_path)
                 # Apply the compare_faces function
                 result = compare_faces(full_path, target_image_path)
@@ -135,10 +134,13 @@ def mile1():
     return csv_path
 
 
-
+def run(url):
+	base_filename = download_and_extract_zip(url)
+	csv_path = mile1(base_filename)
+	return csv_path
 
 def main():
-    st.title('Data Processing and Prediction')
+    st.title('Milestone 1')
     
     # Input for URL
     url = st.text_input("Enter the URL of the zip file to process:")
