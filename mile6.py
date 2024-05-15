@@ -140,7 +140,7 @@ def run(url):
 	return csv_path
 
 def main():
-    st.title('Milestone 1')
+    st.title('Milestone 6 using Milestone 1')
     
     # Input for URL
     url = st.text_input("Enter the URL of the zip file to process:")
